@@ -1,5 +1,5 @@
 import React from 'react';
-import {render, getByTestId, queryByTestId, getByText} from '@testing-library/react';
+import {render, getByTestId, queryByTestId, getByText,rerender} from '@testing-library/react';
 import MissionsList from './MissionsList';
 
 const missionsData= [ {
@@ -55,32 +55,54 @@ const missionsData= [ {
   },
  ];
 
-test("re-renders missions list",()=>{
-//arrange (render the component and set up mock data)
+ test("rerender mission list",()=>{
+   render (<MissionsList error={""} missions={[]} />)
+ })
 
-const {rerender,getAllByTestId,toHaveLength,queryAllByTestId} = render(<MissionsList   missions={[]} />)
+test ("rerenders with the returned missions data",()=>{
+const {queryAllByTestId,getByText,rerender}= render (<MissionsList missions= {[]}/>)
+
+expect(queryAllByTestId(/mission/)).toHaveLength(0)
  
-const mission=queryAllByTestId(/mission/i);//when null is ok for not found use query
-expect(mission).toHaveLength(0);
-//act (rerender component with missions data passed in)
-rerender(<MissionsList missions={missionsData}/>)
-const missions=getAllByTestId(/mission/i);//returns array when >1 element
+rerender (<MissionsList missions={missionsData}/>)
 
-//assert
-expect(missions).toHaveLength(3);
+expect(queryAllByTestId("mission")).toHaveLength(3);
+//When do we use queryAllBy and when to use getAllBy
+//queryBy doesnt thru error when null.
+ 
+rerender(<MissionsList error={"oops new error!"} missions={[]}/>)
+
+expect(getByText(/oops new error!/i)).toBeInTheDocument();
 
 })
 
-test ('displays error message when error',()=>{
-//arrange
-const {rerender,getByTestId,toHaveValue,queryByText,getByText} = render(<MissionsList error={''} missions={[]}/>)
-const err=queryByText(/Error found!/i);
-expect(err).toBeNull;
-//act
- rerender(<MissionsList error={'Error found!'} missions={[]}/>)
-// const errorCheck= getByTestId(/error/i);
-const errorCheck= getByText(/Error found!/i);
-//assert
-// expect(errorCheck).toHaveTextContent('Error found!');
-expect(errorCheck).toBeInTheDocument();
-})
+ /////////////////////////
+// test("re-renders missions list",()=>{
+// //arrange (render the component and set up mock data)
+
+// const {rerender,getAllByTestId,toHaveLength,queryAllByTestId} = render(<MissionsList   missions={[]} />)
+ 
+// const mission=queryAllByTestId(/mission/i);//when null is ok for not found use query
+// expect(mission).toHaveLength(0);
+// //act (rerender component with missions data passed in)
+// rerender(<MissionsList missions={missionsData}/>)
+// const missions=getAllByTestId(/mission/i);//returns array when >1 element
+
+// //assert
+// expect(missions).toHaveLength(3);
+
+// })
+
+// test ('displays error message when error',()=>{
+// //arrange
+// const {rerender,getByTestId,toHaveValue,queryByText,getByText} = render(<MissionsList error={''} missions={[]}/>)
+// const err=queryByText(/Error found!/i);
+// expect(err).toBeNull;
+// //act
+//  rerender(<MissionsList error={'Error found!'} missions={[]}/>)
+// // const errorCheck= getByTestId(/error/i);
+// const errorCheck= getByText(/Error found!/i);
+// //assert
+// // expect(errorCheck).toHaveTextContent('Error found!');
+// expect(errorCheck).toBeInTheDocument();
+// })

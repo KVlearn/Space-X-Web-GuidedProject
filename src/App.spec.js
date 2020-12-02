@@ -1,10 +1,45 @@
 import React from 'react';
-import {render, getByRole, fireEvent, findByText, queryAllByTestId,waitFor} from '@testing-library/react';
+import {render,fireEvent, findByText, getAllByTestId, wait, waitFor, getByTestId} from '@testing-library/react';
 import App from './App';
 //to tell that the api call fetchMissions is mocked
 import {fetchMissions as mockFetchMissions} from './api/fetchMissions'; 
 
+test('successfull render of app',()=>{
+  render (<App />)
+});
+
 jest.mock('./api/fetchMissions')
+
+test ('app fetches and renders missions data', async()=>{
+//intercept the actual api call flow so the 
+//mock function is done to resolve for the mission data
+// console.log(mockFetchMissions);
+mockFetchMissions.mockResolvedValueOnce(missionsData)
+
+const {getByRole,getAllByTestId} = render (<App />)
+
+const getDataButton = getByRole('button',{name:/get Data/i})
+
+expect (getDataButton).toBeInTheDocument();
+
+//fireEvent on the button
+fireEvent.click(getDataButton)
+
+//api call async is initiated - so fetching data is displayed. async so we use findByText which can wait for api call
+findByText(/fetching data/i);
+
+// await wait()
+//   expect(getAllByTestId("mission")).toHaveLength(3)
+
+await waitFor(()=>{
+  expect(getAllByTestId(/mission/)).toHaveLength(3);
+});
+
+expect(mockFetchMissions).toBeCalled();
+})
+
+
+// jest.mock('./api/fetchMissions')
 const missionsData= {data: [ {
     mission_name: 'Thaicom',
     mission_id: '9D1B7E0',
@@ -58,29 +93,32 @@ const missionsData= {data: [ {
   },
  ]};
 
-test('successfully renders data from api',async ()=>{
-//intercept the actual api call flow and it calls the 
-//mockfunction and resolve with the given Data.
-mockFetchMissions.mockResolvedValueOnce(missionsData)
+// test('successfully renders data from api',async ()=>{
+// //intercept the actual api call flow and it calls the 
+// //mockfunction and resolve with the given Data.
+// mockFetchMissions.mockResolvedValueOnce(missionsData)
 
-const {getByRole,getAllByTestId}= render(<App />)
-//check for get data button
-const getDataButton= getByRole('button',{name: /get data/i});
-expect(getDataButton).toBeInTheDocument();
+// const {getByRole,getAllByTestId}= render(<App />)
+// //check for get data button
+// const getDataButton= getByRole('button',{name: /get data/i});
+// expect(getDataButton).toBeInTheDocument();
 
-//click on get data button
-//  - fetching message is rendered
-//  - api call is initiated
+// //click on get data button
+// //  - fetching message is rendered
+// //  - api call is initiated
 
-fireEvent.click(getDataButton);
-//since now this is asyn , we use findBy which can await
-findByText(/we are fetching data/i)
-//waits for api and then renders data that is returned.
-//change the test call back function to async-await
-//use waitFor function to await for the API call to resolve.
+// fireEvent.click(getDataButton);
+// //userEvent includes all the events ! get from userevent library say for dropdown.
 
-await waitFor(()=>{
-    expect(getAllByTestId(/mission/)).toHaveLength(3);
-})
+// //since now this is asyn , we use findBy which can await
+// findByText(/we are fetching data/i);
+// //waits for api and then renders data that is returned.
+// //change the test call back function to async-await
+// //use waitFor function to await for the API call to resolve.
 
-})
+// await waitFor(()=>{
+//     expect(getAllByTestId(/mission/)).toHaveLength(3);
+// });
+
+// expect(mockFetchMissions).toHaveBeenCalled;
+// })
